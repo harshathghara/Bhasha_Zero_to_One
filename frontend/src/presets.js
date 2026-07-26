@@ -40,6 +40,7 @@ export const SHOW_GAMES = [
       "Ramesh Malhotra is dead. Five people tied to him must talk, scheme, and pin the fall — or take it.",
     meta: "5 contestants · Game Master · Leaks",
     available: true,
+    coverImage: "/games/who-takes-the-blame.png",
   },
   {
     id: "whispers",

@@ -23,6 +23,10 @@ describe("ShowSetup", () => {
   it("starts on game pick, then cast with all five selected", () => {
     render(<ShowSetup onCreated={() => {}} />);
     expect(screen.getByTestId("game-pick-step")).toBeInTheDocument();
+    expect(screen.getByTestId("game-cover-blame")).toHaveAttribute(
+      "src",
+      "/games/who-takes-the-blame.png",
+    );
     expect(screen.queryByRole("button", { name: /start show/i })).not.toBeInTheDocument();
 
     goToCast();
