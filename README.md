@@ -1,5 +1,3 @@
-# Sheesha Ghar
-
 An AI reality-show simulation. Five LLM-driven characters are locked in a
 house with one dead man and one killer among them, and they must talk,
 scheme, and betray each other in public and in private until the house
