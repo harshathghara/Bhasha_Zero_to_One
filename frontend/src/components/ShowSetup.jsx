@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { createShow } from "../api/client";
 import {
-  PRESET_AGENTS,
   SHOW_GAMES,
-  DEFAULT_SHOW_PROMPT,
-  DEFAULT_GM_PROMPT,
-  DEFAULT_RULES_TEXT,
   SHOW_TITLE,
+  agentsForGame,
+  defaultSelectedIdsForGame,
+  promptsForGame,
 } from "../presets";
 import { portraitBackgroundStyle } from "../world/portraits";
 
@@ -228,8 +227,8 @@ export default function ShowSetup({ onCreated }) {
   const [step, setStep] = useState("game");
   const [selectedGameId, setSelectedGameId] = useState("blame");
   const [maxRounds, setMaxRounds] = useState("");
-  const [selectedIds, setSelectedIds] = useState(
-    () => PRESET_AGENTS.map((agent) => agent.id)
+  const [selectedIds, setSelectedIds] = useState(() =>
+    defaultSelectedIdsForGame("blame")
   );
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -253,13 +252,22 @@ export default function ShowSetup({ onCreated }) {
   }, []);
 
   const selectedGame = SHOW_GAMES.find((game) => game.id === selectedGameId);
+  const castAgents = agentsForGame(selectedGameId);
+
+  function selectGame(gameId) {
+    setSelectedGameId(gameId);
+    setSelectedIds(defaultSelectedIdsForGame(gameId));
+    setError(null);
+  }
 
   function toggleAgent(id) {
-    setSelectedIds((current) =>
-      current.includes(id)
-        ? current.filter((existing) => existing !== id)
-        : [...current, id]
-    );
+    setSelectedIds((current) => {
+      if (current.includes(id)) {
+        return current.filter((existing) => existing !== id);
+      }
+      if (current.length >= 5) return current;
+      return [...current, id];
+    });
   }
 
   async function handleSubmit(event) {
@@ -271,11 +279,13 @@ export default function ShowSetup({ onCreated }) {
     setError(null);
     setSubmitting(true);
     try {
+      const prompts = promptsForGame(selectedGameId);
       const show = await createShow({
         title: SHOW_TITLE,
-        show_prompt: DEFAULT_SHOW_PROMPT,
-        gm_prompt: DEFAULT_GM_PROMPT,
-        rules_text: DEFAULT_RULES_TEXT,
+        game_id: selectedGameId,
+        show_prompt: prompts.show_prompt,
+        gm_prompt: prompts.gm_prompt,
+        rules_text: prompts.rules_text,
         max_rounds: maxRounds === "" ? null : Number(maxRounds),
         agent_preset_ids: selectedIds,
       });
@@ -321,7 +331,7 @@ export default function ShowSetup({ onCreated }) {
                     aria-disabled={!game.available}
                     disabled={!game.available}
                     data-testid={`game-card-${game.id}`}
-                    onClick={() => game.available && setSelectedGameId(game.id)}
+                    onClick={() => game.available && selectGame(game.id)}
                     style={gameCardStyle(selected, game.available, hasCover)}
                   >
                     {hasCover ? (
@@ -473,7 +483,10 @@ export default function ShowSetup({ onCreated }) {
             <div style={eyebrowStyle}>CASTING</div>
             <h1 style={titleStyle}>Pick your five</h1>
             <p style={subtitleStyle}>
-              Exactly five enter the house. Each card lists the traits that drive how they scheme.
+              Exactly five enter. Each card lists the traits that drive how they scheme.
+              {castAgents.length > 5
+                ? ` Choose five from ${castAgents.length}.`
+                : ""}
             </p>
 
             <div style={counterStyle}>
@@ -495,9 +508,10 @@ export default function ShowSetup({ onCreated }) {
             </div>
 
             <div style={castGridStyle}>
-              {PRESET_AGENTS.map((agent, index) => {
+              {castAgents.map((agent, index) => {
                 const selected = selectedIds.includes(agent.id);
-                const spriteKey = `slot-${index + 1}`;
+                // Only five sprite sheets exist; cycle for larger pools.
+                const spriteKey = `slot-${(index % 5) + 1}`;
                 return (
                   <button
                     key={agent.id}

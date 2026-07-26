@@ -47,6 +47,33 @@ def test_create_show_returns_running_show_with_five_contestants(tmp_path):
     assert data["status"] == "running"
 
 
+def test_create_ananta_show_with_temple_cast(tmp_path):
+    client, _ = make_client(tmp_path)
+    five = ["krishna", "karna", "shakuni", "arjun", "hanuman"]
+    response = create_show(
+        client,
+        game_id="ananta",
+        agent_preset_ids=five,
+        show_prompt="Temple test prompt Heart of Ananta",
+        gm_prompt="Temple GM",
+        rules_text="Temple rules",
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert {c["id"] for c in data["contestants"]} == set(five)
+    assert "Heart of Ananta" in data["show_prompt"]
+
+
+def test_create_show_rejects_cross_game_agents(tmp_path):
+    client, _ = make_client(tmp_path)
+    response = create_show(
+        client,
+        game_id="ananta",
+        agent_preset_ids=["creditor", "wife", "lawyer", "brother", "househelp"],
+    )
+    assert response.status_code == 400
+
+
 def test_show_title_and_id_are_fixed_brand(tmp_path):
     client, _ = make_client(tmp_path)
     data = create_show(
