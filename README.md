@@ -1,6 +1,6 @@
 # Bhram
 
-An AI reality-show simulation. Five LLM-driven characters are locked in a
+An AI reality-show. Five LLM-driven characters are locked in a
 house with one dead man and one killer among them, and they must talk,
 scheme, and betray each other in public and in private until the house
 pins the blame on someone. A Game Master agent enforces house rules, a
@@ -96,36 +96,36 @@ round supervisor, narrator, presets, LLM config, and the full HTTP API.
 
 ### Module map (`backend/app/`)
 
-| Module | Purpose |
-|---|---|
-| `main.py` | Entrypoint: loads `.env`, builds the store and LLM client, creates the app. |
-| `api.py` | All FastAPI routes and the WebSocket endpoint (see [API](#http--websocket-api)). |
-| `models.py` | Core dataclasses/enums: `Event`, `Agent`, `Show`, `RoundConfig`, `EventKind`, `Visibility`. |
-| `event_bus.py` | Per-show pub/sub (`EventBus`), visibility rules, and `perform_leak()` — the core leak mechanic. |
-| `agent_loop.py` | Per-agent async loop: builds each agent's prompt from what it can see, calls the LLM, dispatches its tool calls. |
-| `gm_loop.py` | The Game Master's async loop: batches events, periodically rules on them. |
+| Module          | Purpose                                                                                                                                       |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `main.py`       | Entrypoint: loads `.env`, builds the store and LLM client, creates the app.                                                                   |
+| `api.py`        | All FastAPI routes and the WebSocket endpoint (see [API](#http--websocket-api)).                                                              |
+| `models.py`     | Core dataclasses/enums: `Event`, `Agent`, `Show`, `RoundConfig`, `EventKind`, `Visibility`.                                                   |
+| `event_bus.py`  | Per-show pub/sub (`EventBus`), visibility rules, and `perform_leak()` — the core leak mechanic.                                               |
+| `agent_loop.py` | Per-agent async loop: builds each agent's prompt from what it can see, calls the LLM, dispatches its tool calls.                              |
+| `gm_loop.py`    | The Game Master's async loop: batches events, periodically rules on them.                                                                     |
 | `supervisor.py` | `run_round`: orchestrates agent loops + GM loop + round-end conditions (timeout, budget exhaustion, quiescence), then narrates and snapshots. |
-| `narrator.py` | Post-round LLM narration: a short recap and a longer story chapter. |
-| `presets.py` | The default show premise, GM prompt, house rules, and the five murder-cast character personalities. |
-| `tools.py` | OpenAI-style function-calling schemas for agents (`AGENT_TOOLS`) and the GM (`GM_TOOLS`). |
-| `llm_client.py` | Thin wrapper over the `openai` SDK for plain completions and tool-calling completions. |
-| `llm_config.py` | Resolves `LLM_PROVIDER`/`LLM_MODEL`/API key from the environment. |
-| `store.py` | In-memory show store plus per-round JSON snapshotting. |
+| `narrator.py`   | Post-round LLM narration: a short recap and a longer story chapter.                                                                           |
+| `presets.py`    | The default show premise, GM prompt, house rules, and the five murder-cast character personalities.                                           |
+| `tools.py`      | OpenAI-style function-calling schemas for agents (`AGENT_TOOLS`) and the GM (`GM_TOOLS`).                                                     |
+| `llm_client.py` | Thin wrapper over the `openai` SDK for plain completions and tool-calling completions.                                                        |
+| `llm_config.py` | Resolves `LLM_PROVIDER`/`LLM_MODEL`/API key from the environment.                                                                             |
+| `store.py`      | In-memory show store plus per-round JSON snapshotting.                                                                                        |
 
 ### HTTP + WebSocket API
 
-| Method & path | Description |
-|---|---|
-| `POST /shows` | Create a show. Requires exactly 5 `agent_preset_ids`; optional `secret_connections` between two agents. Returns the created show. |
-| `GET /shows/{show_id}` | Full current state of a show. |
-| `POST /shows/{show_id}/rounds` | Run one round to completion; returns `{round, recap, narrative}`. 409 once `max_rounds` is reached. |
-| `POST /shows/{show_id}/stop` | Signal the in-progress round to end early. |
-| `POST /shows/{show_id}/end` | Force-end the show. |
-| `POST /shows/{show_id}/agents/{agent_id}/kill` | Manually eliminate a contestant. |
-| `POST /shows/{show_id}/events` | Producer injects a public clue/note into the live log. |
-| `POST /shows/{show_id}/events/{seq}/release` | Mark an event released (visible to everyone) without a leak announcement. |
-| `POST /shows/{show_id}/events/{seq}/leak` | Reveal a private message/confession as a public leak announcement. 404 if the event doesn't exist, 409 if it isn't leakable or was already leaked. |
-| `WS /ws/{show_id}` | Live stream of every new event for that show as it's published. |
+| Method & path                                  | Description                                                                                                                                        |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /shows`                                  | Create a show. Requires exactly 5 `agent_preset_ids`; optional `secret_connections` between two agents. Returns the created show.                  |
+| `GET /shows/{show_id}`                         | Full current state of a show.                                                                                                                      |
+| `POST /shows/{show_id}/rounds`                 | Run one round to completion; returns `{round, recap, narrative}`. 409 once `max_rounds` is reached.                                                |
+| `POST /shows/{show_id}/stop`                   | Signal the in-progress round to end early.                                                                                                         |
+| `POST /shows/{show_id}/end`                    | Force-end the show.                                                                                                                                |
+| `POST /shows/{show_id}/agents/{agent_id}/kill` | Manually eliminate a contestant.                                                                                                                   |
+| `POST /shows/{show_id}/events`                 | Producer injects a public clue/note into the live log.                                                                                             |
+| `POST /shows/{show_id}/events/{seq}/release`   | Mark an event released (visible to everyone) without a leak announcement.                                                                          |
+| `POST /shows/{show_id}/events/{seq}/leak`      | Reveal a private message/confession as a public leak announcement. 404 if the event doesn't exist, 409 if it isn't leakable or was already leaked. |
+| `WS /ws/{show_id}`                             | Live stream of every new event for that show as it's published.                                                                                    |
 
 Agents can also trigger a leak themselves, in-band, via the `leak_message`
 tool — functionally the same mechanism as the HTTP endpoint above, just
@@ -159,24 +159,24 @@ client.
 
 ### Structure (`frontend/src/`)
 
-| Path | Purpose |
-|---|---|
-| `App.jsx` | Top-level state machine: show setup → live world page. |
-| `api/client.js` | HTTP client wrapping every backend endpoint above. |
-| `components/ShowSetup.jsx` | Pre-game screen: pick 5 presets, prompts, secret connections. |
-| `components/WorldView.jsx` | The live 2D world + chat sidebar, with name/type filters and the Leak button. |
-| `components/LeakConfirmDialog.jsx` | Confirmation modal before leaking a private event. |
-| `components/RoundEndModal.jsx` | End-of-round recap and story display. |
-| `components/EventFeed.jsx` / `LiveRoom.jsx` | Event log / live-round views. |
-| `pages/WorldPage.jsx` | Composes the world view and round controls, driven by the WebSocket stream. |
-| `world/` | Canvas/sprite rendering engine: map, movement, pathfinding, sprites, speech-bubble styling, and the mapping from backend events to in-world behavior. |
+| Path                                        | Purpose                                                                                                                                               |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `App.jsx`                                   | Top-level state machine: show setup → live world page.                                                                                                |
+| `api/client.js`                             | HTTP client wrapping every backend endpoint above.                                                                                                    |
+| `components/ShowSetup.jsx`                  | Pre-game screen: pick 5 presets, prompts, secret connections.                                                                                         |
+| `components/WorldView.jsx`                  | The live 2D world + chat sidebar, with name/type filters and the Leak button.                                                                         |
+| `components/LeakConfirmDialog.jsx`          | Confirmation modal before leaking a private event.                                                                                                    |
+| `components/RoundEndModal.jsx`              | End-of-round recap and story display.                                                                                                                 |
+| `components/EventFeed.jsx` / `LiveRoom.jsx` | Event log / live-round views.                                                                                                                         |
+| `pages/WorldPage.jsx`                       | Composes the world view and round controls, driven by the WebSocket stream.                                                                           |
+| `world/`                                    | Canvas/sprite rendering engine: map, movement, pathfinding, sprites, speech-bubble styling, and the mapping from backend events to in-world behavior. |
 
 ## Design history
 
 `docs/superpowers/specs/` and `docs/superpowers/plans/` hold the paired
 design spec + implementation plan for every feature built so far (the core
 harness, the murder-blame rewrite, the gamified world UI, producer notes,
-chat filters and the leak feature, and more). Useful as a record of *why*
+chat filters and the leak feature, and more). Useful as a record of _why_
 things are the way they are, not required reading to get started.
 
 ## Known limitations

@@ -49,6 +49,17 @@ describe("ShowSetup", () => {
     expect(screen.getByText(/Observant, mischievous, underestimated/i)).toBeInTheDocument();
   });
 
+  it("shows the live-world puppet on each cast card", () => {
+    render(<ShowSetup onCreated={() => {}} />);
+    goToCast();
+
+    expect(screen.getByTestId("cast-portrait-creditor")).toBeInTheDocument();
+    expect(screen.getByTestId("cast-portrait-wife")).toBeInTheDocument();
+    expect(screen.getByTestId("cast-portrait-lawyer")).toBeInTheDocument();
+    expect(screen.getByTestId("cast-portrait-brother")).toBeInTheDocument();
+    expect(screen.getByTestId("cast-portrait-househelp")).toBeInTheDocument();
+  });
+
   it("shows the fixed Bhram title and submits murder defaults", async () => {
     const spy = vi.spyOn(api, "createShow").mockResolvedValue({ id: "bhram" });
     const onCreated = vi.fn();

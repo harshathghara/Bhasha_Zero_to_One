@@ -17,6 +17,31 @@
         overflow: hidden;
         background: #1a1a1e;
       }
+
+      /* Producer-theme scrollbars (Firefox + Chromium/WebKit) */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #c8c0a8 #1a1a22;
+      }
+      *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      *::-webkit-scrollbar-track {
+        background: #121218;
+        border: 1px solid #2a2a32;
+      }
+      *::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #c8c0a8 0%, #8a8070 100%);
+        border: 2px solid #121218;
+        border-radius: 2px;
+      }
+      *::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #ddd5bb 0%, #a09078 100%);
+      }
+      *::-webkit-scrollbar-corner {
+        background: #121218;
+      }
     </style>
   </head>
   <body>
