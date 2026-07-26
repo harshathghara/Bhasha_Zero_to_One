@@ -3,10 +3,15 @@ import pytest
 from app.models import Agent, AgentStatus
 from app.presets import (
     DEFAULT_SHOW_PROMPT, DEFAULT_GM_PROMPT, DEFAULT_RULES_TEXT,
-    PRESET_AGENT_PERSONALITIES, build_preset_agent,
+    PRESET_AGENT_PERSONALITIES, GAMES, ANANTA_AGENTS, BLAME_AGENTS,
+    build_preset_agent, get_game,
 )
 
 MURDER_IDS = {"creditor", "wife", "lawyer", "brother", "househelp"}
+ANANTA_IDS = {
+    "krishna", "karna", "shakuni", "arjun", "chanakya",
+    "ravana", "hanuman", "vibhishana",
+}
 
 
 def test_defaults_are_nonempty_strings():
@@ -48,11 +53,37 @@ def test_househelp_calls_out_leaks_by_name():
     assert "name" in prompt
 
 
+def test_ananta_game_has_eight_explorers_and_temple_premise():
+    game = get_game("ananta")
+    assert len(game["agents"]) == 8
+    assert {a["id"] for a in game["agents"]} == ANANTA_IDS
+    assert "Heart of Ananta" in game["show_prompt"]
+    assert "temple" in game["gm_prompt"].lower()
+    assert "heart" in game["rules_text"].lower()
+    for preset in ANANTA_AGENTS:
+        prompt = preset["personality_prompt"].lower()
+        assert "betrayal loop" in prompt
+        assert "do not know the true nature of the heart" in prompt
+        assert "2 to 4 short sentences" in prompt
+
+
+def test_games_registry_includes_blame_and_ananta():
+    assert set(GAMES) == {"blame", "ananta"}
+    assert len(BLAME_AGENTS) == 5
+    assert get_game("blame")["agents"] is BLAME_AGENTS
+
+
 def test_build_preset_agent_returns_active_agent():
     agent = build_preset_agent("creditor")
     assert isinstance(agent, Agent)
     assert agent.id == "creditor"
     assert agent.status == AgentStatus.ACTIVE
+
+
+def test_build_preset_agent_works_for_ananta_cast():
+    agent = build_preset_agent("krishna")
+    assert agent.id == "krishna"
+    assert "Strategist" in agent.name
 
 
 def test_build_preset_agent_missing_raises():
