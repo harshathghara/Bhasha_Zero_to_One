@@ -36,8 +36,8 @@ const SENDER_PALETTE = [
 const shellStyle = {
   display: "flex",
   flexDirection: "row",
-  width: "100vw",
-  height: "100vh",
+  width: "100%",
+  height: "100%",
   margin: 0,
   background: "#1a1a1e",
   overflow: "hidden",
@@ -51,12 +51,14 @@ const gameAreaStyle = {
   alignItems: "center",
   justifyContent: "center",
   overflow: "hidden",
+  // Size the stage from this pane (not the viewport) so a producer chrome bar can sit above.
+  containerType: "size",
 };
 
 // Centered 5:4 game frame inside the flexible left column.
 const frameStyle = {
   position: "relative",
-  width: "min(100%, calc(100vh * 10 / 8))",
+  width: "min(100%, calc(100cqh * 10 / 8))",
   aspectRatio: "10 / 8",
   maxHeight: "100%",
   maxWidth: "100%",
