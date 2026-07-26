@@ -8,6 +8,9 @@ import {
   DEFAULT_RULES_TEXT,
   SHOW_TITLE,
 } from "../presets";
+import { portraitBackgroundStyle } from "../world/portraits";
+
+const CAST_PORTRAIT_SIZE = 48;
 
 const PIXEL_FONT = '"Press Start 2P", "VT323", monospace';
 const BODY_FONT = '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif';
@@ -408,8 +411,9 @@ export default function ShowSetup({ onCreated }) {
             </div>
 
             <div style={castGridStyle}>
-              {PRESET_AGENTS.map((agent) => {
+              {PRESET_AGENTS.map((agent, index) => {
                 const selected = selectedIds.includes(agent.id);
+                const spriteKey = `slot-${index + 1}`;
                 return (
                   <button
                     key={agent.id}
@@ -449,22 +453,18 @@ export default function ShowSetup({ onCreated }) {
                     </span>
 
                     <div
+                      data-testid={`cast-portrait-${agent.id}`}
+                      aria-hidden="true"
                       style={{
-                        width: 48,
-                        height: 48,
+                        width: CAST_PORTRAIT_SIZE,
+                        height: CAST_PORTRAIT_SIZE,
                         borderRadius: 4,
                         border: `2px solid ${agent.accent}`,
-                        background: "#f3d9ca",
-                        display: "grid",
-                        placeItems: "center",
-                        fontFamily: PIXEL_FONT,
-                        fontSize: 14,
-                        color: "#5a3a2a",
+                        backgroundColor: "#0c0c10",
                         marginBottom: 12,
+                        ...portraitBackgroundStyle(spriteKey, CAST_PORTRAIT_SIZE),
                       }}
-                    >
-                      {agent.initial}
-                    </div>
+                    />
 
                     <div
                       style={{

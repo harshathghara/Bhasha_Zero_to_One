@@ -56,6 +56,14 @@ describe("WorldPage", () => {
     ]);
   });
 
+  it("puts Start round and Transcript in a producer chrome bar", () => {
+    render(<WorldPage show={show} />);
+    const chrome = screen.getByTestId("producer-chrome");
+    expect(chrome).toContainElement(screen.getByRole("button", { name: /start round/i }));
+    expect(chrome).toContainElement(screen.getByRole("button", { name: /transcript/i }));
+    expect(screen.getByTestId("producer-status")).toHaveTextContent(/ready to start/i);
+  });
+
   it("shows the round-end modal with recap when a round finishes", async () => {
     vi.spyOn(api, "startRound").mockResolvedValue({
       round: 1,
@@ -174,5 +182,47 @@ describe("WorldPage", () => {
 
     await waitFor(() => expect(endSpy).toHaveBeenCalledWith("bhram"));
     expect(onEndGame).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps Transcript disabled until a round has ended", () => {
+    render(<WorldPage show={show} />);
+    expect(screen.getByRole("button", { name: /transcript/i })).toBeDisabled();
+  });
+
+  it("opens the transcript preview after a round ends", async () => {
+    vi.spyOn(api, "startRound").mockResolvedValue({
+      round: 1,
+      recap: "Recap one.",
+      narrative: "Story one.",
+    });
+    vi.spyOn(api, "getShow").mockResolvedValue({
+      ...show,
+      events: [
+        {
+          round: 1,
+          seq: 1,
+          sender_id: "game_master",
+          kind: "gm_announcement",
+          visibility: "public",
+          recipients: [],
+          text: "Doors sealed.",
+          timestamp: 1710000000,
+        },
+      ],
+      recaps: { 1: "Recap one." },
+      narratives: { 1: "Story one." },
+    });
+    render(<WorldPage show={show} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /start round/i }));
+    await screen.findByTestId("round-end-modal");
+
+    const transcriptBtn = screen.getByRole("button", { name: /transcript/i });
+    expect(transcriptBtn).toBeEnabled();
+    fireEvent.click(transcriptBtn);
+
+    expect(await screen.findByTestId("transcript-modal")).toBeInTheDocument();
+    expect(api.getShow).toHaveBeenCalledWith("bhram");
+    expect(screen.getByText("Doors sealed.")).toBeInTheDocument();
   });
 });
