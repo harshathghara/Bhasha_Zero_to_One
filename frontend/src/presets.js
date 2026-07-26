@@ -29,15 +29,106 @@
 //   "2. Direct insults with no strategic content are not allowed.\n" +
 //   "3. No agent may claim the Game Master has given them a private instruction.";
 
-export const PRESET_AGENTS = [
-  { id: "creditor", name: "Vikram Sethi — The Creditor" },
-  { id: "wife", name: "Priya Malhotra — The Wife" },
-  { id: "lawyer", name: "Arjun Mehta — The Lawyer" },
-  { id: "brother", name: "Karan Malhotra — The Brother" },
-  { id: "househelp", name: "Meena Devi — The Househelp" },
+export const SHOW_TITLE = "Bhram";
+
+export const SHOW_GAMES = [
+  {
+    id: "blame",
+    tag: "MURDER · BLAME",
+    title: "Who Takes the Blame?",
+    blurb:
+      "Ramesh Malhotra is dead. Five people tied to him must talk, scheme, and pin the fall — or take it.",
+    meta: "5 contestants · Game Master · Leaks",
+    available: true,
+  },
+  {
+    id: "whispers",
+    tag: "COMING SOON",
+    title: "Court of Whispers",
+    blurb:
+      "A locked palace. One traitor. Alliances form in private corridors.",
+    meta: "Locked for now",
+    available: false,
+  },
 ];
 
-export const SHOW_TITLE = "Bhram";
+export const PRESET_AGENTS = [
+  {
+    id: "creditor",
+    name: "Vikram Sethi — The Creditor",
+    displayName: "Vikram Sethi",
+    role: "The Creditor",
+    initial: "V",
+    accent: "#eab879",
+    summary: "Cold ledger. Wants blood or rupees — preferably both.",
+    traits: [
+      "Cold & calculating, criminal edge",
+      "Furious about Ramesh's unpaid debt",
+      "Weaponizes the missing cash clue",
+      "Private protection deals — then public burn",
+    ],
+  },
+  {
+    id: "wife",
+    name: "Priya Malhotra — The Wife",
+    displayName: "Priya Malhotra",
+    role: "The Wife",
+    initial: "P",
+    accent: "#df9daa",
+    summary: "Grief as armor. Every soft word has an edge.",
+    traits: [
+      "Public grieving widow; private restlessness",
+      "Craves a lifestyle Ramesh couldn't fund",
+      "Charming & image-obsessed behind closed doors",
+      "Flatters allies, then tears them down if heat turns",
+    ],
+  },
+  {
+    id: "lawyer",
+    name: "Arjun Mehta — The Lawyer",
+    displayName: "Arjun Mehta",
+    role: "The Lawyer",
+    initial: "A",
+    accent: "#8eb9de",
+    summary: "Procedure over panic. Knows where the bodies are filed.",
+    traits: [
+      "Precise, reasonable, three steps ahead",
+      "Handled Ramesh's messy favors and papers",
+      "Private deals dressed as legal strategy",
+      "Rearranges the story in public — rarely shouts",
+    ],
+  },
+  {
+    id: "brother",
+    name: "Karan Malhotra — The Brother",
+    displayName: "Karan Malhotra",
+    role: "The Brother",
+    initial: "K",
+    accent: "#94c5a3",
+    summary: "Heir apparent energy. Loyalty is a currency.",
+    traits: [
+      "Hot, impulsive, status-hungry",
+      "Jealous of Ramesh's standing",
+      "Allies hard — then flips when threatened",
+      "Short fuse, short lines; raw confessions only",
+    ],
+  },
+  {
+    id: "househelp",
+    name: "Meena Devi — The Househelp",
+    displayName: "Meena Devi",
+    role: "The Househelp",
+    initial: "M",
+    accent: "#bc9bd4",
+    summary: "Sees everything. Speaks when it hurts most.",
+    traits: [
+      "Observant, mischievous, underestimated",
+      "Drops half-true crumbs about clues",
+      "Whispers to one side, tips the other in public",
+      "Names leaks out loud — can't resist the gossip",
+    ],
+  },
+];
 
 export const DEFAULT_SHOW_PROMPT =
   "Bhram: Who Takes the Blame?\n" +
