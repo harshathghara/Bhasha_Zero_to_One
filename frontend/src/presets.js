@@ -342,6 +342,7 @@ export const SHOW_GAMES = [
       "An ancient temple seals the Heart of Ananta. Five explorers must trust, betray, and decide the relic’s fate — while the temple watches every choice.",
     meta: "Pick 5 of 8 · Game Master · Leaks",
     available: true,
+    coverImage: "/games/Temple.png",
   },
   {
     id: "whispers",

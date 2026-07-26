@@ -27,6 +27,10 @@ describe("ShowSetup", () => {
       "src",
       "/games/who-takes-the-blame.png",
     );
+    expect(screen.getByTestId("game-cover-ananta")).toHaveAttribute(
+      "src",
+      "/games/Temple.png",
+    );
     expect(screen.queryByRole("button", { name: /start show/i })).not.toBeInTheDocument();
 
     goToCast();
