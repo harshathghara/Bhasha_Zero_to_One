@@ -95,7 +95,7 @@ const subtitleStyle = {
 
 const gameGridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 280px))",
   gap: 16,
   marginBottom: 24,
 };
@@ -185,23 +185,25 @@ const roundsInputStyle = {
   fontSize: 14,
 };
 
-function gameCardStyle(selected, available) {
+function gameCardStyle(selected, available, hasCover) {
   return {
     background: colors.panel,
     border: `2px solid ${selected ? colors.parchment : colors.elevated}`,
     borderRadius: 4,
-    padding: 18,
+    padding: hasCover ? 0 : 18,
     cursor: available ? "pointer" : "not-allowed",
-    minHeight: 168,
+    minHeight: hasCover ? 280 : 168,
     display: "flex",
     flexDirection: "column",
     textAlign: "left",
     opacity: available ? 1 : 0.55,
     boxShadow: selected
-      ? "inset 0 0 0 1px rgba(200, 192, 168, 0.25)"
+      ? "inset 0 0 0 1px rgba(200, 192, 168, 0.35), 0 0 0 1px rgba(200, 192, 168, 0.2)"
       : "none",
     color: colors.text,
     fontFamily: BODY_FONT,
+    overflow: "hidden",
+    position: "relative",
   };
 }
 
@@ -309,6 +311,7 @@ export default function ShowSetup({ onCreated }) {
             <div style={gameGridStyle} role="listbox" aria-label="Available shows">
               {SHOW_GAMES.map((game) => {
                 const selected = game.id === selectedGameId;
+                const hasCover = Boolean(game.coverImage);
                 return (
                   <button
                     key={game.id}
@@ -319,48 +322,129 @@ export default function ShowSetup({ onCreated }) {
                     disabled={!game.available}
                     data-testid={`game-card-${game.id}`}
                     onClick={() => game.available && setSelectedGameId(game.id)}
-                    style={gameCardStyle(selected, game.available)}
+                    style={gameCardStyle(selected, game.available, hasCover)}
                   >
-                    <div
-                      style={{
-                        fontFamily: PIXEL_FONT,
-                        fontSize: 7,
-                        color: colors.parchment,
-                        marginBottom: 12,
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {game.tag}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: PIXEL_FONT,
-                        fontSize: 11,
-                        lineHeight: 1.6,
-                        marginBottom: 10,
-                      }}
-                    >
-                      {game.title}
-                    </div>
-                    <div
-                      style={{
-                        color: colors.muted,
-                        fontSize: 13,
-                        lineHeight: 1.45,
-                        flex: 1,
-                      }}
-                    >
-                      {game.blurb}
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 14,
-                        fontSize: 12,
-                        color: colors.soft,
-                      }}
-                    >
-                      {game.meta}
-                    </div>
+                    {hasCover ? (
+                      <>
+                        <img
+                          src={game.coverImage}
+                          alt=""
+                          data-testid={`game-cover-${game.id}`}
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            // Keep the orange spotlight / body near the visual center.
+                            objectPosition: "center 42%",
+                            display: "block",
+                          }}
+                        />
+                        <div
+                          aria-hidden="true"
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            background:
+                              "linear-gradient(180deg, rgba(12,12,16,0.55) 0%, rgba(12,12,16,0.05) 38%, rgba(12,12,16,0.2) 55%, rgba(12,12,16,0.92) 100%)",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "relative",
+                            zIndex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "flex-end",
+                            minHeight: 280,
+                            padding: "14px 14px 16px",
+                            textAlign: "left",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontFamily: PIXEL_FONT,
+                              fontSize: 7,
+                              color: colors.parchment,
+                              marginBottom: 10,
+                              lineHeight: 1.6,
+                              textShadow: "0 1px 2px rgba(0,0,0,0.8)",
+                            }}
+                          >
+                            {game.tag}
+                          </div>
+                          <div
+                            style={{
+                              fontFamily: PIXEL_FONT,
+                              fontSize: 12,
+                              lineHeight: 1.55,
+                              marginBottom: 10,
+                              color: colors.text,
+                              textShadow: "0 1px 3px rgba(0,0,0,0.85)",
+                            }}
+                          >
+                            {game.title}
+                          </div>
+                          <div
+                            style={{
+                              color: "#c8c8d0",
+                              fontSize: 13,
+                              lineHeight: 1.45,
+                              marginBottom: 12,
+                            }}
+                          >
+                            {game.blurb}
+                          </div>
+                          <div style={{ fontSize: 12, color: colors.soft }}>
+                            {game.meta}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          style={{
+                            fontFamily: PIXEL_FONT,
+                            fontSize: 7,
+                            color: colors.parchment,
+                            marginBottom: 12,
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {game.tag}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: PIXEL_FONT,
+                            fontSize: 11,
+                            lineHeight: 1.6,
+                            marginBottom: 10,
+                          }}
+                        >
+                          {game.title}
+                        </div>
+                        <div
+                          style={{
+                            color: colors.muted,
+                            fontSize: 13,
+                            lineHeight: 1.45,
+                            flex: 1,
+                          }}
+                        >
+                          {game.blurb}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 14,
+                            fontSize: 12,
+                            color: colors.soft,
+                          }}
+                        >
+                          {game.meta}
+                        </div>
+                      </>
+                    )}
                   </button>
                 );
               })}
