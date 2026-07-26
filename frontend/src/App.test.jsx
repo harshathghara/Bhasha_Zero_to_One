@@ -18,8 +18,9 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.queryByTestId("world-page-stub")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /start show/i })).toBeInTheDocument();
-    // Murder cast is pre-selected; do not toggle the checkboxes (that would deselect them).
+    expect(screen.getByTestId("game-pick-step")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
+    // Murder cast is pre-selected; do not toggle the cards (that would deselect them).
     fireEvent.click(screen.getByRole("button", { name: /start show/i }));
 
     await waitFor(() => expect(screen.getByTestId("world-page-stub")).toBeInTheDocument());
@@ -31,14 +32,16 @@ describe("App", () => {
     vi.spyOn(api, "createShow").mockResolvedValue({ id: "bhram", contestants: [] });
     render(<App />);
 
-    // Murder cast is pre-selected; do not toggle the checkboxes (that would deselect them).
+    fireEvent.click(screen.getByRole("button", { name: /continue/i }));
+    // Murder cast is pre-selected; do not toggle the cards (that would deselect them).
     fireEvent.click(screen.getByRole("button", { name: /start show/i }));
 
     await screen.findByTestId("world-page-stub");
     fireEvent.click(screen.getByRole("button", { name: /end game/i }));
 
     expect(screen.queryByTestId("world-page-stub")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /start show/i })).toBeInTheDocument();
+    expect(screen.getByTestId("game-pick-step")).toBeInTheDocument();
     expect(screen.getByTestId("show-title")).toHaveTextContent("Bhram");
   });
 });
+
