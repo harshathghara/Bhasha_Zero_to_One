@@ -23,6 +23,10 @@ describe("ShowSetup", () => {
   it("starts on game pick, then cast with all five selected", () => {
     render(<ShowSetup onCreated={() => {}} />);
     expect(screen.getByTestId("game-pick-step")).toBeInTheDocument();
+    expect(screen.getByTestId("game-cover-blame")).toHaveAttribute(
+      "src",
+      "/games/who-takes-the-blame.png",
+    );
     expect(screen.queryByRole("button", { name: /start show/i })).not.toBeInTheDocument();
 
     goToCast();
@@ -78,6 +82,7 @@ describe("ShowSetup", () => {
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Bhram",
+        game_id: "blame",
         max_rounds: 6,
         agent_preset_ids: [
           "creditor", "wife", "lawyer", "brother", "househelp",
@@ -85,6 +90,40 @@ describe("ShowSetup", () => {
       })
     );
     expect(spy.mock.calls[0][0].show_prompt).toContain("Ramesh Malhotra");
+  });
+
+  it("switches to Temple of Ananta cast pool and prompts", async () => {
+    const spy = vi.spyOn(api, "createShow").mockResolvedValue({ id: "bhram" });
+    render(<ShowSetup onCreated={() => {}} />);
+
+    fireEvent.click(screen.getByTestId("game-card-ananta"));
+    goToCast();
+
+    expect(screen.getByLabelText(/Krishna — The Strategist/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Vibhishana — The Truth-teller/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /start show/i })).toBeDisabled();
+
+    for (const name of [
+      /Krishna — The Strategist/i,
+      /Karna — The Loyalist/i,
+      /Shakuni — The Manipulator/i,
+      /Arjun — The Warrior/i,
+      /Chanakya — The Counselor/i,
+    ]) {
+      fireEvent.click(screen.getByLabelText(name));
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: /start show/i }));
+    await waitFor(() => expect(spy).toHaveBeenCalled());
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        game_id: "ananta",
+        agent_preset_ids: [
+          "krishna", "karna", "shakuni", "arjun", "chanakya",
+        ],
+      }),
+    );
+    expect(spy.mock.calls[0][0].show_prompt).toContain("Heart of Ananta");
   });
 
   it("sends null rounds when the field is left blank", async () => {

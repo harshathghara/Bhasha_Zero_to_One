@@ -11,8 +11,8 @@ from .models import (
     AgentStatus, EventKind, GM_ID, RoundConfig, Show, ShowStatus, PRODUCER_ID,
 )
 from .presets import (
-    DEFAULT_GM_PROMPT, DEFAULT_RULES_TEXT, DEFAULT_SHOW_PROMPT, SHOW_TITLE,
-    build_preset_agent,
+    DEFAULT_GM_PROMPT, DEFAULT_RULES_TEXT, DEFAULT_SHOW_PROMPT, GAMES,
+    SHOW_TITLE, build_preset_agent, get_game,
 )
 from .supervisor import run_round
 
@@ -31,6 +31,7 @@ class CreateShowRequest(BaseModel):
     max_rounds: Optional[int] = None
     secret_connections: list = []
     agent_preset_ids: list
+    game_id: str = "blame"
 
 
 class InjectEventRequest(BaseModel):
@@ -90,6 +91,21 @@ def create_app(store, llm_client, config: RoundConfig = None) -> FastAPI:
         if len(req.agent_preset_ids) != 5:
             raise HTTPException(400, "Must pick exactly 5 agents")
         try:
+            game = get_game(req.game_id)
+        except KeyError as exc:
+            raise HTTPException(
+                400,
+                f"Unknown game_id {req.game_id!r}. Expected one of: "
+                f"{', '.join(sorted(GAMES))}",
+            ) from exc
+        allowed = {agent["id"] for agent in game["agents"]}
+        unknown = [pid for pid in req.agent_preset_ids if pid not in allowed]
+        if unknown:
+            raise HTTPException(
+                400,
+                f"Agents not in game {req.game_id!r}: {', '.join(unknown)}",
+            )
+        try:
             contestants = [build_preset_agent(pid) for pid in req.agent_preset_ids]
         except KeyError as exc:
             raise HTTPException(400, str(exc)) from exc
@@ -97,9 +113,9 @@ def create_app(store, llm_client, config: RoundConfig = None) -> FastAPI:
         show = Show(
             id=slugify_show_id(SHOW_TITLE),
             title=SHOW_TITLE,
-            show_prompt=req.show_prompt,
-            gm_prompt=req.gm_prompt,
-            rules_text=req.rules_text,
+            show_prompt=req.show_prompt or game["show_prompt"],
+            gm_prompt=req.gm_prompt or game["gm_prompt"],
+            rules_text=req.rules_text or game["rules_text"],
             max_rounds=req.max_rounds,
             contestants=contestants,
             status=ShowStatus.RUNNING,
