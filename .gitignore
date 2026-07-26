@@ -1,0 +1,11 @@
+.env
+.worktrees/
+.superpowers/
+backend/venv/
+backend/.venv/
+__pycache__/
+*.pyc
+frontend/node_modules/
+backend/snapshots/
+frontend/dist/
+.playwright-mcp/
