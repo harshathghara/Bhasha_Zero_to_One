@@ -5,6 +5,7 @@ import WorldView, {
   characterNamePlacement,
   chatKindLabel,
   colorForSender,
+  isScrolledNearBottom,
   shortCharacterName,
 } from "./WorldView";
 import { speechLabelFromEvent } from "../world/speechStyles";
@@ -69,6 +70,24 @@ describe("character labels", () => {
     const placement = characterNamePlacement(32, 32);
     expect(placement.left).toBeTruthy();
     expect(placement.transform).toContain("-100%");
+  });
+});
+
+describe("isScrolledNearBottom", () => {
+  it("treats a missing element as near bottom", () => {
+    expect(isScrolledNearBottom(null)).toBe(true);
+  });
+
+  it("is true when within the threshold of the bottom", () => {
+    expect(isScrolledNearBottom({
+      scrollHeight: 1000, scrollTop: 740, clientHeight: 200,
+    })).toBe(true);
+  });
+
+  it("is false when scrolled up past the threshold", () => {
+    expect(isScrolledNearBottom({
+      scrollHeight: 1000, scrollTop: 0, clientHeight: 200,
+    })).toBe(false);
   });
 });
 
@@ -421,5 +440,57 @@ describe("WorldView", () => {
       "Event has already been leaked",
     );
     expect(screen.getByTestId("leak-confirm-dialog")).toBeInTheDocument();
+  });
+
+  it("auto-scrolls new chats only while the user is near the bottom", async () => {
+    render(<WorldView showId="s1" characters={characters} />);
+    await waitFor(() => expect(WorldEngine).toHaveBeenCalledTimes(1));
+    const onEvent = openEventSocket.mock.calls[0][1];
+
+    act(() => {
+      onEvent({
+        seq: 1, sender_id: "slot-1", kind: "agent_action",
+        visibility: "public", recipients: [], text: "first",
+      });
+    });
+
+    const list = screen.getByTestId("chat-list");
+    let scrollTop = 0;
+    Object.defineProperty(list, "scrollHeight", {
+      get: () => 1000, configurable: true,
+    });
+    Object.defineProperty(list, "clientHeight", {
+      value: 200, configurable: true,
+    });
+    Object.defineProperty(list, "scrollTop", {
+      get: () => scrollTop,
+      set: (value) => { scrollTop = value; },
+      configurable: true,
+    });
+
+    scrollTop = 0;
+    fireEvent.scroll(list);
+
+    act(() => {
+      onEvent({
+        seq: 2, sender_id: "slot-1", kind: "agent_action",
+        visibility: "public", recipients: [], text: "second",
+      });
+    });
+
+    await waitFor(() => expect(screen.getByTestId("chat-entry-seq-2")).toBeInTheDocument());
+    expect(scrollTop).toBe(0);
+
+    scrollTop = 800;
+    fireEvent.scroll(list);
+
+    act(() => {
+      onEvent({
+        seq: 3, sender_id: "slot-1", kind: "agent_action",
+        visibility: "public", recipients: [], text: "third",
+      });
+    });
+
+    await waitFor(() => expect(scrollTop).toBe(1000));
   });
 });

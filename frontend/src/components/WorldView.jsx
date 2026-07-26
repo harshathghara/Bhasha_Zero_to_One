@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { MAP_WIDTH, MAP_HEIGHT, TILE_SIZE } from "../world/map";
 import {
   loadImage,
@@ -230,9 +230,17 @@ const TYPE_FILTER_OPTIONS = [
   { value: "leak", label: "Leak" },
 ];
 
+const CHAT_STICK_BOTTOM_THRESHOLD_PX = 80;
+
 function truncate(text) {
   if (text.length <= BUBBLE_TEXT_MAX_LENGTH) return text;
   return `${text.slice(0, BUBBLE_TEXT_MAX_LENGTH)}…`;
+}
+
+/** True when the scrollable chat list is at (or near) the bottom. */
+export function isScrolledNearBottom(el, threshold = CHAT_STICK_BOTTOM_THRESHOLD_PX) {
+  if (!el) return true;
+  return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
 }
 
 /** Stable color per character; GM / narrator get fixed accents. */
@@ -407,7 +415,9 @@ function recipientNames(event, charactersById) {
 
 export default function WorldView({ showId, characters, onDialogueBusyChange }) {
   const canvasRef = useRef(null);
+  const chatListRef = useRef(null);
   const chatEndRef = useRef(null);
+  const stickChatToBottomRef = useRef(true);
   const dialogueBusyRef = useRef(false);
   const onDialogueBusyChangeRef = useRef(onDialogueBusyChange);
   const [loadError, setLoadError] = useState(null);
@@ -435,14 +445,18 @@ export default function WorldView({ showId, characters, onDialogueBusyChange }) 
 
   useEffect(() => {
     setChatLog([]);
+    stickChatToBottomRef.current = true;
   }, [showId]);
 
-  useEffect(() => {
-    const end = chatEndRef.current;
-    if (end && typeof end.scrollIntoView === "function") {
-      end.scrollIntoView({ behavior: "smooth" });
-    }
+  useLayoutEffect(() => {
+    const list = chatListRef.current;
+    if (!list || !stickChatToBottomRef.current) return;
+    list.scrollTop = list.scrollHeight;
   }, [chatLog]);
+
+  function handleChatListScroll() {
+    stickChatToBottomRef.current = isScrolledNearBottom(chatListRef.current);
+  }
 
   useEffect(() => {
     let engine;
@@ -709,7 +723,12 @@ export default function WorldView({ showId, characters, onDialogueBusyChange }) 
             No messages match these filters.
           </p>
         ) : (
-          <ul style={chatListStyle}>
+          <ul
+            ref={chatListRef}
+            style={chatListStyle}
+            data-testid="chat-list"
+            onScroll={handleChatListScroll}
+          >
             {filteredChatLog.map((event, index) => {
               const senderColor = colorForSender(event.sender_id, characterIds);
               const speechKind = speechKindFromEvent(event);
