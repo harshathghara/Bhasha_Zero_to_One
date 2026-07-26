@@ -1,5 +1,6 @@
 import asyncio
 import re
+import uuid
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
@@ -21,6 +22,13 @@ def slugify_show_id(title: str) -> str:
     """URL-safe id: letters/digits only, no '?' or punctuation that breaks routes."""
     slug = re.sub(r"[^a-z0-9]+", "-", title.lower())
     return slug.strip("-") or "show"
+
+
+def make_show_id(game_id: str) -> str:
+    """Unique per create so a second lobby game never reuses the first show's bus."""
+    brand = slugify_show_id(SHOW_TITLE)
+    game = slugify_show_id(game_id)
+    return f"{brand}-{game}-{uuid.uuid4().hex[:8]}"
 
 
 class CreateShowRequest(BaseModel):
@@ -110,8 +118,10 @@ def create_app(store, llm_client, config: RoundConfig = None) -> FastAPI:
         except KeyError as exc:
             raise HTTPException(400, str(exc)) from exc
         # Product brand name is fixed; client-supplied titles are ignored.
+        # Show ids must be unique — a fixed "bhram" id reused the first
+        # show's EventBus, so story 2 kept seeing story 1's events.
         show = Show(
-            id=slugify_show_id(SHOW_TITLE),
+            id=make_show_id(req.game_id),
             title=SHOW_TITLE,
             show_prompt=req.show_prompt or game["show_prompt"],
             gm_prompt=req.gm_prompt or game["gm_prompt"],
@@ -176,6 +186,9 @@ def create_app(store, llm_client, config: RoundConfig = None) -> FastAPI:
         stop_event = stop_events.get(show_id)
         if stop_event is not None:
             stop_event.set()
+        stop_events.pop(show_id, None)
+        buses.pop(show_id, None)
+        sockets.pop(show_id, None)
         return show.to_dict()
 
     @app.post("/shows/{show_id}/agents/{agent_id}/kill")
