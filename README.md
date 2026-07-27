@@ -6,12 +6,39 @@ Five AI characters share a house. They talk, scheme, and betray — in public an
 private. A Game Master LLM enforces the rules. You are the **producer**: watch the
 live 2D world, leak a secret mid-round, and steer the drama.
 
+**Live demo:** [https://bhasha-zero-to-h8an52oz1-harshathgharas-projects.vercel.app/](https://bhasha-zero-to-h8an52oz1-harshathgharas-projects.vercel.app/)
+
 | | |
 |---|---|
 | **Product** | Bhram |
 | **Repo** | Bhasha |
+| **Live demo** | [Try Bhram on Vercel](https://bhasha-zero-to-h8an52oz1-harshathgharas-projects.vercel.app/) |
 | **Stack** | FastAPI + React · OpenAI or Groq · WebSocket live feed |
 | **Demo shows** | Who Takes the Blame? · The Temple of Ananta |
+
+---
+
+## Game preview
+
+How a producer run looks, step by step:
+
+### 1. Choose the show
+
+Pick a premise for tonight’s episode.
+
+![Theme selection — choose the show](frontend/public/games/Theme%20selection.png)
+
+### 2. Cast five characters
+
+Select exactly five contestants. Each card shows the traits that drive how they scheme.
+
+![Character selection — pick your five](frontend/public/games/Character%20Selection.png)
+
+### 3. Run the live show
+
+Start a round. Watch public talk, private deals, and leaks play out in the 2D world + chat.
+
+![Live reality show — world view and chat](frontend/public/games/Reality%20Show.png)
 
 ---
 
@@ -200,36 +227,97 @@ docs/         Specs, plans, hackathon notes
 
 ---
 
-## Quick start (demo day)
+## How to run
 
-**Terminal 1 — backend**
+You need **two terminals**: backend (`:8000`) and frontend (`:5173`).
+
+### Prerequisites
+
+- Python 3.11+ (3.12 works)
+- Node.js 18+ and npm
+- An API key for **OpenAI** or **Groq**
+
+### 1. Backend
 
 ```bash
 cd backend
+python -m venv .venv
+```
+
+Activate the virtualenv:
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+```
+
+Install deps and create your env file:
+
+```bash
 pip install -r requirements.txt
-cp .env.example .env          # set LLM_PROVIDER + matching API key
-uvicorn app.main:app --reload # http://localhost:8000
+cp .env.example .env
+# Windows PowerShell alternative:
+# Copy-Item .env.example .env
 ```
 
-`.env`:
+Edit `backend/.env` and set a provider + key:
 
 ```
-LLM_PROVIDER=openai            # or groq
-LLM_MODEL=gpt-4o-mini          # or e.g. openai/gpt-oss-120b for groq
-OPENAI_API_KEY=
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=sk-...
 GROQ_API_KEY=
 ```
 
-**Terminal 2 — frontend**
+For Groq instead:
+
+```
+LLM_PROVIDER=groq
+LLM_MODEL=openai/gpt-oss-120b
+OPENAI_API_KEY=
+GROQ_API_KEY=gsk_...
+```
+
+Start the API:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+Backend: [http://localhost:8000](http://localhost:8000)
+
+### 2. Frontend
+
+In a **second** terminal:
 
 ```bash
 cd frontend
 npm install
-npm run dev                   # http://localhost:5173
+npm run dev
 ```
 
-Open the UI → pick a show → pick 5 cast → **Start show** → **Start round** →
-try a **Leak** when a private line appears.
+Frontend: [http://localhost:5173](http://localhost:5173)
+
+The UI talks to `http://localhost:8000` by default (`VITE_API_BASE` if you need to override).
+
+### 3. Run a show
+
+1. Open [http://localhost:5173](http://localhost:5173)
+2. Pick a show (e.g. **Who Takes the Blame?**)
+3. Pick exactly **5** cast members → **Start show**
+4. **Start round** → watch the live 2D world + chat
+5. When a private / confession line appears, hit **Leak**
+6. After the round, read the recap + story chapter; optionally download the transcript
+
+### Optional: tests
+
+```bash
+cd backend && pytest
+cd frontend && npm test
+```
 
 ---
 
