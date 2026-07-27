@@ -15,6 +15,30 @@ live 2D world, leak a secret mid-round, and steer the drama.
 
 ---
 
+## Game preview
+
+How a producer run looks, step by step:
+
+### 1. Choose the show
+
+Pick a premise for tonight’s episode.
+
+![Theme selection — choose the show](frontend/public/games/Theme%20selection.png)
+
+### 2. Cast five characters
+
+Select exactly five contestants. Each card shows the traits that drive how they scheme.
+
+![Character selection — pick your five](frontend/public/games/Character%20Selection.png)
+
+### 3. Run the live show
+
+Start a round. Watch public talk, private deals, and leaks play out in the 2D world + chat.
+
+![Live reality show — world view and chat](frontend/public/games/Reality%20Show.png)
+
+---
+
 ## The pitch (30 seconds)
 
 1. **Not a chatbot** — five agents with motives, tools, and memory of what they can see.
@@ -197,30 +221,6 @@ frontend/     Producer UI
 backend/      Game engine + API
 docs/         Specs, plans, hackathon notes
 ```
-
----
-
-## Game preview
-
-How a producer run looks, step by step:
-
-### 1. Choose the show
-
-Pick a premise for tonight’s episode.
-
-![Theme selection — choose the show](frontend/public/games/Theme%20selection.png)
-
-### 2. Cast five characters
-
-Select exactly five contestants. Each card shows the traits that drive how they scheme.
-
-![Character selection — pick your five](frontend/public/games/Character%20Selection.png)
-
-### 3. Run the live show
-
-Start a round. Watch public talk, private deals, and leaks play out in the 2D world + chat.
-
-![Live reality show — world view and chat](frontend/public/games/Reality%20Show.png)
 
 ---
 
