@@ -6,10 +6,13 @@ Five AI characters share a house. They talk, scheme, and betray — in public an
 private. A Game Master LLM enforces the rules. You are the **producer**: watch the
 live 2D world, leak a secret mid-round, and steer the drama.
 
+**Live demo:** [https://bhasha-zero-to-h8an52oz1-harshathgharas-projects.vercel.app/](https://bhasha-zero-to-h8an52oz1-harshathgharas-projects.vercel.app/)
+
 | | |
 |---|---|
 | **Product** | Bhram |
 | **Repo** | Bhasha |
+| **Live demo** | [Try Bhram on Vercel](https://bhasha-zero-to-h8an52oz1-harshathgharas-projects.vercel.app/) |
 | **Stack** | FastAPI + React · OpenAI or Groq · WebSocket live feed |
 | **Demo shows** | Who Takes the Blame? · The Temple of Ananta |
 
