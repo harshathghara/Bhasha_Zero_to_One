@@ -74,14 +74,47 @@ def test_create_show_rejects_cross_game_agents(tmp_path):
     assert response.status_code == 400
 
 
-def test_show_title_and_id_are_fixed_brand(tmp_path):
+def test_show_title_is_fixed_brand_and_id_is_url_safe(tmp_path):
     client, _ = make_client(tmp_path)
     data = create_show(
         client, title="Ignored Custom Title?"
     ).json()
     assert data["title"] == "Bhram"
-    assert data["id"] == "bhram"
     assert "?" not in data["id"]
+    assert data["id"]  # non-empty slug
+
+
+def test_second_show_gets_unique_id_and_keeps_first_show(tmp_path):
+    """Creating Ananta after Blame must not reuse id 'bhram' / stale EventBus."""
+    client, store = make_client(tmp_path)
+    first = create_show(client).json()
+    client.post(f"/shows/{first['id']}/rounds")
+    first_events = len(store.get(first["id"]).events)
+
+    five = ["krishna", "karna", "shakuni", "arjun", "hanuman"]
+    second = create_show(
+        client,
+        game_id="ananta",
+        agent_preset_ids=five,
+        show_prompt="Temple test prompt Heart of Ananta",
+        gm_prompt="Temple GM",
+        rules_text="Temple rules",
+    ).json()
+
+    assert second["id"] != first["id"]
+    assert store.get(first["id"]).id == first["id"]
+    assert {c["id"] for c in second["contestants"]} == set(five)
+    assert "Heart of Ananta" in second["show_prompt"]
+
+    client.post(f"/shows/{second['id']}/rounds")
+    second_show = store.get(second["id"])
+    assert len(second_show.events) > 0
+    assert len(store.get(first["id"]).events) == first_events
+    assert all(
+        e.sender_id in set(five) | {"game_master"}
+        for e in second_show.events
+        if e.sender_id != "producer"
+    )
 
 
 def test_secret_connections_are_applied_symmetrically(tmp_path):
